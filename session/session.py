@@ -1,6 +1,7 @@
 # print("-- NOTE: This session manager is supposed to be started immediately after i3wm.")
 
 import argparse,db,util
+import os,shutil
 
 p = argparse.ArgumentParser(
     prog="i3de-session",
@@ -27,13 +28,25 @@ p.add_argument("--polkit",
 
 args = p.parse_args()
 
+
+CONFIG_DIR = os.path.expanduser("~/.config/i3de/")
+os.makedirs(CONFIG_DIR,exist_ok=True)
+
+if not os.path.exists(os.path.join(CONFIG_DIR,"i3.conf")):
+    DEFAULT_DIR = "/usr/share/i3de/defaults"
+    for i in os.listdir(DEFAULT_DIR):
+        shutil.copyfile(
+            os.path.join(DEFAULT_DIR,i),
+            os.path.join(CONFIG_DIR,i),
+            follow_symlinks=True)
+
 if args.start_i3:
     db.INFO("Launching i3wm...")
-    util.silentOpen(["i3"])
+    util.silentOpen(["i3","-c","$HOME/.config/i3de/i3.conf"])
 else:
     db.WARN("-si was not called, so i3wm was not started.")
 
-util.silentOpen([args.bar])
-util.silentOpen([args.compositor])
-util.silentOpen([args.notify])
-util.silentOpen([args.polkit])
+# util.silentOpen([args.bar])
+# util.silentOpen([args.compositor])
+# util.silentOpen([args.notify])
+# util.silentOpen([args.polkit])
